@@ -22,6 +22,7 @@ namespace TuyenBeatNameRestorer
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.ForegroundColor = ConsoleColor.Yellow;
+            string obfuscatedModulePath = "";
             for (int i = 0; i < (args.Length > 2 ? 2 : args.Length); i++)
             {
                 string str = args[i];
@@ -33,13 +34,15 @@ namespace TuyenBeatNameRestorer
                 }
                 if (str.EndsWith(".exe") || str.EndsWith(".dll"))
                 {
-                    obfuscatedModule = AssemblyDef.Load(str.Replace("\"", "")).ManifestModule;
+                    obfuscatedModulePath = str.Replace("\"", "");
+                    obfuscatedModule = AssemblyDef.Load(obfuscatedModulePath).ManifestModule;
                 }
             }
             if (obfuscatedModule == null)
             {
                 Console.Write("Đường dẫn tệp bị mã hóa: ");
-                obfuscatedModule = AssemblyDef.Load(Console.ReadLine().Replace("\"", "")).ManifestModule;
+                obfuscatedModulePath = Console.ReadLine().Replace("\"", "");
+                obfuscatedModule = AssemblyDef.Load(obfuscatedModulePath).ManifestModule;
             }
             if (obfuscatedXmlMapping == null)
             {
@@ -61,7 +64,7 @@ namespace TuyenBeatNameRestorer
                 system("pause");
                 return;
             }
-            Console.WriteLine("Đang giải mã " + obfuscatedModule.FullName + "...");
+            Console.WriteLine("Đang phục hồi tên module " + obfuscatedModule.FullName + "...");
             TypeDef lastType = obfuscatedModule.GlobalType;
             Dictionary<string, string> namespaceMapping = new Dictionary<string, string>();
             foreach (XmlNode xmlNode in mappings.ChildNodes.Cast<XmlNode>().Where(node => node.Attributes["Type"].Value == "Namespace"))
@@ -114,7 +117,7 @@ namespace TuyenBeatNameRestorer
 
             }
             Console.WriteLine("Đang lưu tệp...");
-            string outputName = Path.GetFileNameWithoutExtension(obfuscatedModule.FullName) + "-Beated" + Path.GetExtension(obfuscatedModule.FullName);
+            string outputName = Path.GetDirectoryName(obfuscatedModulePath) + "\\" + Path.GetFileNameWithoutExtension(obfuscatedModulePath) + "-Beated" + Path.GetExtension(obfuscatedModulePath);
             obfuscatedModule.Write(outputName);
             Console.WriteLine("Tệp được lưu tại: " + Environment.CurrentDirectory + "\\" + outputName);
             system("pause");
